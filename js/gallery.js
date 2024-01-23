@@ -65,41 +65,40 @@ const images = [
 ];
 
 const galleryList = document.querySelector(".gallery");
-const elements = images.map(({ original, description, preview }) => {
-  const item = document.createElement("li");
-  item.classList.add("gallery-item");
-  galleryList.append(item);
-  const linkImage = document.createElement("a");
-  linkImage.classList.add("gallery-link");
-  linkImage.setAttribute("href", original);
-  linkImage.onclick = function (e) {
-    e.preventDefault();
-  };
-  item.append(linkImage);
-  const imageTag = document.createElement("img");
-  imageTag.src = preview;
-  imageTag.alt = description;
-  imageTag.classList.add("gallery-image");
-  imageTag.setAttribute("data-source", original);
-  imageTag.width = 360;
-  imageTag.height = 200;
-  linkImage.append(imageTag);
+let htmlMarkup = "";
+images.map(({ original, description, preview }) => {
+  htmlMarkup += `<li class="gallery-item">
+    <a class="gallery-link" href="${original}" onclick="event.preventDefault();">
+      <img
+        class="gallery-image"
+        src="${preview}"
+        data-source="${original}"
+        alt="${description}"
+        width="360"
+        height="200"
+      />
+    </a>
+  </li>`;
 });
+galleryList.innerHTML = htmlMarkup;
 galleryList.addEventListener("click", (e) => {
   if (e.target.nodeName !== "IMG") {
     return;
   }
-  basicLightbox
-    .create(`<img src="${e.target.dataset.source}">`, {
-      onShow: (instance) => {
-        const handleKeyPress = (e) => {
-          if (e.code === "Escape" || e.key === "Escape") {
-            instance.close();
-            document.removeEventListener("keydown", handleKeyPress, true);
-          }
-        };
+
+  function handleKeyPress(e) {
+    e.key === "Escape" ? instance.close() : null;
+  }
+  const instance = basicLightbox.create(
+    `<img src="${e.target.dataset.source}">`,
+    {
+      onShow: () => {
         document.addEventListener("keydown", handleKeyPress, true);
       },
-    })
-    .show();
+      onClose: () => {
+        document.removeEventListener("keydown", handleKeyPress, true);
+      },
+    }
+  );
+  instance.show();
 });
